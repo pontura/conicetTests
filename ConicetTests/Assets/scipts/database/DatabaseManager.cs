@@ -7,6 +7,7 @@ public class DatabaseManager : MonoBehaviour
 {
     string hashPassword = "pontura";
     string url = "http://localhost/conicet/";
+    
 
     public void SaveUser(DatabaseUser userdata, System.Action OnSaved)
     {

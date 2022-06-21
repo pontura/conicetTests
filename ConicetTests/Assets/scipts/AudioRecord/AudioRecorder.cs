@@ -8,26 +8,17 @@ using System.Threading;
 public class AudioRecorder : MonoBehaviour
 {
     AudioClip recording;
-    //Keep this one as a global variable (outside the functions) too and use GetComponent during start to save resources
     AudioSource audioSource;
     private float startRecordingTime;
 
-    //Get the audiosource here to save resources
     private void Start()
     {
         audioSource = GetComponent<AudioSource>();
     }
-    void Update()
-    {
-        if (Input.GetKeyDown(KeyCode.A))
-            Init();
-        if (Input.GetKeyUp(KeyCode.A))
-            Stop();
-    }
     public void Init()
     {
+        Invoke("Stop", 5);
         Events.Log("Start Recording");
-        //Get the max frequency of a microphone, if it's less than 44100 record at the max frequency, else record at 44100
         int minFreq;
         int maxFreq;
         int freq = 22500;
@@ -41,6 +32,7 @@ public class AudioRecorder : MonoBehaviour
     }
     public void Stop()
     {
+        CancelInvoke();
         Events.Log("Stop Recoding");
         Microphone.End("");
 

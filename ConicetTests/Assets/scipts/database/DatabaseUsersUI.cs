@@ -6,11 +6,14 @@ using UnityEngine.UI;
 public class DatabaseUsersUI : MonoBehaviour
 {
     static DatabaseUsersUI mInstance = null;
+    public int tabletID;
+    public int userAutoIncrementID;
 
     public static DatabaseUsersUI Instance  {  get  { return mInstance;  }    }
 
     [SerializeField] DatabaseUserButton button;
     [SerializeField] GameObject panel;
+    [SerializeField] Text tabletField;
 
     [SerializeField] Transform container;
     public DatabaseUser active;
@@ -18,6 +21,7 @@ public class DatabaseUsersUI : MonoBehaviour
 
     public DatabaseData databaseData;
     public DatabaseManager databaseManager;
+    public DatabaseTablet databaseTablet;
 
     void Awake()
     {
@@ -28,12 +32,26 @@ public class DatabaseUsersUI : MonoBehaviour
         databaseManager = GetComponent<DatabaseManager>();
         databaseData = GetComponent<DatabaseData>();
         databaseUserAdd = GetComponent<DatabaseUserAdd>();
-        databaseUserAdd.Close();
-        Open();
+        databaseTablet = GetComponent<DatabaseTablet>();
+
         Events.OnStatsGameDone += OnStatsGameDone;
+
+        databaseUserAdd.Close();
+
+        tabletID = PlayerPrefs.GetInt("tabletID", 0);
+        userAutoIncrementID = PlayerPrefs.GetInt("userAutoIncrementID", 0);
+
+        if (tabletID == 0)
+            databaseTablet.Init();
+        else
+        {
+            Open();
+        }
     }
     public void Open()
     {
+        databaseTablet.SetOff();
+        tabletField.text = "TABLET " + tabletID;
         panel.SetActive(true);
         RefreshList();
     }
@@ -52,6 +70,8 @@ public class DatabaseUsersUI : MonoBehaviour
     }
     public void AddNewUser(DatabaseUser user)
     {
+        userAutoIncrementID++;
+        PlayerPrefs.SetInt("userAutoIncrementID", userAutoIncrementID);
         active = user;
         databaseData.AddUser(user);
         RefreshList();

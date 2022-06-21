@@ -6,13 +6,12 @@ using System.Collections.Generic;
 
 public class Data : MonoBehaviour
 {
-    public string url = "http://pontura.com/conicet/";
     const string PREFAB_PATH = "Data";
     static Data mInstance = null;
-    public bool DEBUG;
    
     int dataLoaded;
     public bool allLoaded;
+    public DatabaseContent databaseContent;
 
     public static Data Instance
     {
@@ -50,9 +49,18 @@ public class Data : MonoBehaviour
             Destroy(this.gameObject);
             return;
         }
+        
 
         Screen.sleepTimeout = SleepTimeout.NeverSleep;
         DontDestroyOnLoad(this);
-     
+        databaseContent = GetComponent<DatabaseContent>();
+    }
+    private void Start()
+    {
+        StartCoroutine(databaseContent.Load(OnLoaded));
+    }
+    void OnLoaded()
+    {
+        print("done");
     }
 }

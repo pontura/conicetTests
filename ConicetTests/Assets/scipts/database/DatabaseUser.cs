@@ -16,14 +16,15 @@ public class DatabaseUser
 
     public void GenerateID()
     {
-        id = DateTime.Today.Year.ToString();
-        id += DateTime.Today.Month.ToString();
-        id += DateTime.Today.Day.ToString();
-        id += DateTime.Today.Hour.ToString();
-        id += DateTime.Today.Minute.ToString();
-        id += DateTime.Today.Second.ToString();
-        id += DateTime.Today.Millisecond.ToString();
-        id += (UnityEngine.Random.Range(0, 1000)).ToString();
+        id = DatabaseUsersUI.Instance.tabletID + "-" + DatabaseUsersUI.Instance.userAutoIncrementID;
+        //id = DateTime.Today.Year.ToString();
+        //id += DateTime.Today.Month.ToString();
+        //id += DateTime.Today.Day.ToString();
+        //id += DateTime.Today.Hour.ToString();
+        //id += DateTime.Today.Minute.ToString();
+        //id += DateTime.Today.Second.ToString();
+        //id += DateTime.Today.Millisecond.ToString();
+        //id += (UnityEngine.Random.Range(0, 1000)).ToString();
     }
     public void SavedToDatabase()
     {

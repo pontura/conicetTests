@@ -7,7 +7,8 @@ using UnityEngine.Networking;
 
 public class UploadWav : MonoBehaviour
 {
-    string url = "http://pontura.com/conicet/uploadAudio.php";
+   // string url = "http://pontura.com/conicet/uploadAudio.php";
+    string url = "http://ciipme-voc.wnpower.host/produccion/sync/upload/";
     [SerializeField] AudioSource audioSource;
 
     private void Start()
@@ -56,6 +57,7 @@ public class UploadWav : MonoBehaviour
             Events.Log(path[i]);
 
             yield return files[i].SendWebRequest();
+            form.AddField("uuid", "123");
             form.AddBinaryData("files[]", files[i].downloadHandler.data, Path.GetFileName(path[i]));
 
         }
