@@ -35,18 +35,7 @@ public class DatabaseUsersUI : MonoBehaviour
         databaseTablet = GetComponent<DatabaseTablet>();
 
         Events.OnStatsGameDone += OnStatsGameDone;
-
-        databaseUserAdd.Close();
-
-        tabletID = PlayerPrefs.GetInt("tabletID", 0);
-        userAutoIncrementID = PlayerPrefs.GetInt("userAutoIncrementID", 0);
-
-        if (tabletID == 0)
-            databaseTablet.Init();
-        else
-        {
-            Open();
-        }
+        databaseUserAdd.Close();       
     }
     public void Open()
     {

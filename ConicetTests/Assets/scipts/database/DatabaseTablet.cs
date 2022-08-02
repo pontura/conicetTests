@@ -1,3 +1,4 @@
+using Conicet.UI;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -28,7 +29,7 @@ public class DatabaseTablet : MonoBehaviour
             int tabletID = int.Parse(nameField.text);
             DatabaseUsersUI.Instance.tabletID = tabletID;
             PlayerPrefs.SetInt("tabletID", tabletID);
-            databaseUsersUI.Open();
+            UIMain.Instance.Init();
         }
     }
     public void Close()

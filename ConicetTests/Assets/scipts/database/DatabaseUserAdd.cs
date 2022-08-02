@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using Conicet.UI;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -32,10 +33,12 @@ public class DatabaseUserAdd : MonoBehaviour
         user.gender = sexField.value.ToString();
         user.GenerateID();
         databaseUsersUI.AddNewUser(user);
+        GetComponent<DatabaseUsersUI>().SelectUser(user);
         Close();
     }
     public void Close()
     {
         panel.SetActive(false);
+        UIMain.Instance.MainMenu();
     }
 }

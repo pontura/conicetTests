@@ -8,20 +8,40 @@ namespace Conicet.UI
 {
     public class UIMain : MonoBehaviour
     {
+        static UIMain mInstance = null;
         [SerializeField] Text debugField;
         [SerializeField] Text field;
+        [SerializeField] MainMenu mainMenu;
 
+        public static UIMain Instance { get { return mInstance; } }
+        void Awake()
+        {
+            mInstance = this;
+        }
         void Start()
         {
             Events.Log += Log;
-
             string worldsFolder = Application.persistentDataPath;
-
             DirectoryInfo d = new DirectoryInfo(worldsFolder);
             foreach (var file in d.GetFiles("*.wav"))
             {
                 field.text += "file:/" + file;
             }
+            Init();
+        }
+        public void Init()
+        {
+            DatabaseUsersUI.Instance.tabletID = PlayerPrefs.GetInt("tabletID", 0);
+            DatabaseUsersUI.Instance.userAutoIncrementID = PlayerPrefs.GetInt("userAutoIncrementID", 0);
+
+            if (DatabaseUsersUI.Instance.tabletID == 0)
+                DatabaseUsersUI.Instance.databaseTablet.Init();
+            else
+                MainMenu();
+        }
+        public void MainMenu()
+        {
+            mainMenu.Init();
         }
         void OnDestroy()
         {
@@ -29,14 +49,13 @@ namespace Conicet.UI
         }
         void Log(string s)
         {
-            print("____DEBUG: " + s);
             CancelInvoke();
             debugField.text = s;
-         //   Invoke("Reset", 5);
         }
         private void Reset()
         {
             debugField.text = "";
         }
+       
     }
 }

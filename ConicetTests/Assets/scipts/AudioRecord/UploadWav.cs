@@ -58,7 +58,7 @@ public class UploadWav : MonoBehaviour
 
             yield return files[i].SendWebRequest();
             form.AddField("uuid", "123");
-            form.AddBinaryData("files[]", files[i].downloadHandler.data, Path.GetFileName(path[i]));
+            form.AddBinaryData("files", files[i].downloadHandler.data, Path.GetFileName(path[i]));
 
         }
 
