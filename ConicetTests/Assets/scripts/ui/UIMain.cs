@@ -20,6 +20,7 @@ namespace Conicet.UI
         }
         void Start()
         {
+            debugField.text = "";
             Events.Log += Log;
             string worldsFolder = Application.persistentDataPath;
             DirectoryInfo d = new DirectoryInfo(worldsFolder);
@@ -56,6 +57,9 @@ namespace Conicet.UI
         {
             debugField.text = "";
         }
-       
+        public void OpenSettings()
+        {
+            GetComponent<UISettings>().Init();
+        }
     }
 }

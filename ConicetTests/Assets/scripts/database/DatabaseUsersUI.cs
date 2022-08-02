@@ -26,16 +26,15 @@ public class DatabaseUsersUI : MonoBehaviour
     void Awake()
     {
         mInstance = this;
-    }
-    void Start()
-    {
         databaseManager = GetComponent<DatabaseManager>();
         databaseData = GetComponent<DatabaseData>();
         databaseUserAdd = GetComponent<DatabaseUserAdd>();
         databaseTablet = GetComponent<DatabaseTablet>();
-
-        Events.OnStatsGameDone += OnStatsGameDone;
-        databaseUserAdd.Close();       
+        Events.OnStatsGameDone += OnStatsGameDone;              
+    }
+    private void Start()
+    {
+        //databaseUserAdd.Close();
     }
     public void Open()
     {

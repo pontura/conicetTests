@@ -6,6 +6,8 @@ using UnityEngine.Networking;
 
 public class DatabaseContent : MonoBehaviour
 {
+    public ConfigProfiles activeText;
+
     public string url;
     public Main main;
 
@@ -80,8 +82,28 @@ public class DatabaseContent : MonoBehaviour
                 // Or retrieve results as binary data
                 byte[] results = www.downloadHandler.data;
 
+                int active= PlayerPrefs.GetInt("activeText");
+                if (active != 0)
+                    SetActive(active);
+
                 OnLoaded();
+
             }
         }
+    }
+    public void SetActive(int id)
+    {
+        print("id: " + id);
+        PlayerPrefs.SetInt("activeText", id);
+        foreach (ConfigProfiles cf in main.config_profiles)
+            if (cf.id == id)
+                activeText = cf;
+    }
+    public ConfigProfiles GetConfig(string name)
+    {
+        foreach (ConfigProfiles cf in main.config_profiles)
+            if (cf.name == name)
+                return cf;
+        return null;
     }
 }

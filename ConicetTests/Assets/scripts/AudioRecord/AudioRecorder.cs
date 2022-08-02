@@ -15,9 +15,9 @@ public class AudioRecorder : MonoBehaviour
     {
         audioSource = GetComponent<AudioSource>();
     }
-    public void Init()
+    public void Init(float timer)
     {
-        Invoke("Stop", 5);
+        Invoke("Stop", timer);
         Events.Log("Start Recording");
         int minFreq;
         int maxFreq;
@@ -26,7 +26,7 @@ public class AudioRecorder : MonoBehaviour
         if (maxFreq < 22500)
             freq = maxFreq;
 
-        recording = Microphone.Start("", false, 10, freq);
+        recording = Microphone.Start("", false, 1000, freq);
         startRecordingTime = Time.time;     
 
     }
@@ -37,8 +37,9 @@ public class AudioRecorder : MonoBehaviour
         Microphone.End("");
 
         AudioClip recordingNew = AudioClip.Create(recording.name, (int)((Time.time - startRecordingTime) * recording.frequency), recording.channels, recording.frequency, false);
-        float[] data = new float[(int)((Time.time - startRecordingTime) * recording.frequency)];
-        recording.GetData(data, 0);
+       
+        float[] data = new float[(int)((Time.time - startRecordingTime) * recording.frequency)];       
+        recording.GetData(data, 0);       
         recordingNew.SetData(data, 0);
         this.recording = recordingNew;
 
