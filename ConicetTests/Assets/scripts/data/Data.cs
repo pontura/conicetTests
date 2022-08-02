@@ -13,13 +13,15 @@ public class Data : MonoBehaviour
     public bool allLoaded;
     public DatabaseContent databaseContent;
 
+    public int tabletID;
+    public int userAutoIncrementID;
+
     public static Data Instance
     {
         get
         {
             if (mInstance == null)
             {
-                print("ADS");
                 mInstance = FindObjectOfType<Data>();
 
                 if (mInstance == null)
@@ -62,5 +64,9 @@ public class Data : MonoBehaviour
     void OnLoaded()
     {
         print("done");
+    }
+    public string GetFileName()
+    {
+        return tabletID.ToString() + "" + userAutoIncrementID.ToString();
     }
 }

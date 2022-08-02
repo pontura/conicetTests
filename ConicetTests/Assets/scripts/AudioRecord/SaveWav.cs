@@ -17,7 +17,7 @@ public static class SaveWav
 
         var filepath = Path.Combine(Application.persistentDataPath, filename);
 
-        Events.Log("Save: " + filepath);
+        Debug.Log("Save: " + filepath);
 
         // Make sure directory exists if user is saving to sub dir.
         Directory.CreateDirectory(Path.GetDirectoryName(filepath));

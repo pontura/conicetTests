@@ -21,9 +21,10 @@ public class AudioRecorder : MonoBehaviour
         Events.Log("Start Recording");
         int minFreq;
         int maxFreq;
-        int freq = 22500;
+        //int freq = 22500;
+        int freq = 11250;
         Microphone.GetDeviceCaps("", out minFreq, out maxFreq);
-        if (maxFreq < 22500)
+        if (maxFreq < freq)
             freq = maxFreq;
 
         recording = Microphone.Start("", false, 1000, freq);
@@ -33,7 +34,7 @@ public class AudioRecorder : MonoBehaviour
     public void Stop()
     {
         CancelInvoke();
-        Events.Log("Stop Recoding");
+        print("Stop Recoding");
         Microphone.End("");
 
         AudioClip recordingNew = AudioClip.Create(recording.name, (int)((Time.time - startRecordingTime) * recording.frequency), recording.channels, recording.frequency, false);
@@ -45,8 +46,7 @@ public class AudioRecorder : MonoBehaviour
 
         if (recording != null)
         {
-            string randomName = System.DateTime.Now.ToString().Replace("/", "-").Replace(":", "-").Replace(".", "-").Replace(" ", "-");
-            string fileName = Application.persistentDataPath + "/" + randomName + ".wav";
+            string fileName = Application.persistentDataPath + "/" + Data.Instance.GetFileName() + ".wav";
             SaveWav.Save(fileName, recording);
             GetComponent<UploadWav>().UploadToWeb(recording, fileName);
         }

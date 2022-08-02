@@ -21,7 +21,7 @@ namespace Conicet.UI
         public void Init()
         {
             panel.SetActive(true);
-            tabletInputField.text = DatabaseUsersUI.Instance.tabletID.ToString();
+            tabletInputField.text = Data.Instance.tabletID.ToString();
             AddTests();
         }
         void AddTests()

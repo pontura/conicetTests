@@ -32,11 +32,11 @@ namespace Conicet.UI
         }
         public void Init()
         {
-            DatabaseUsersUI.Instance.tabletID = PlayerPrefs.GetInt("tabletID", 0);
-            DatabaseUsersUI.Instance.userAutoIncrementID = PlayerPrefs.GetInt("userAutoIncrementID", 0);
+            Data.Instance.tabletID = PlayerPrefs.GetInt("tabletID", 0);
+            Data.Instance.userAutoIncrementID = PlayerPrefs.GetInt("userAutoIncrementID", 0);
 
-            if (DatabaseUsersUI.Instance.tabletID == 0)
-                DatabaseUsersUI.Instance.databaseTablet.Init();
+            if (Data.Instance.tabletID == 0)
+                GetComponent<DatabaseTablet>().Init();
             else
                 MainMenu();
         }

@@ -9,6 +9,7 @@ public class MainMenu : MonoBehaviour
     [SerializeField] Text tabletField;
     [SerializeField] Text testTitleField;
     [SerializeField] Text dataField;
+    [SerializeField] Text testField;
 
     private void Awake()
     {
@@ -19,12 +20,14 @@ public class MainMenu : MonoBehaviour
         panel.SetActive(true);
 
         dataField.text = "";
-        tabletField.text = "TABLET " + DatabaseUsersUI.Instance.tabletID;
+        tabletField.text = "TABLET " + Data.Instance.tabletID;
 
         if (Data.Instance.databaseContent.activeText == null)
             testTitleField.text = "";
         else
             testTitleField.text = Data.Instance.databaseContent.activeText.name;
+
+        testField.text = "EMPEZAR [" + Data.Instance.GetFileName() + "]";
     }
     public void Clkicked()
     {

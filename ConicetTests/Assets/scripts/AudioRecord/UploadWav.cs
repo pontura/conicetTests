@@ -54,7 +54,7 @@ public class UploadWav : MonoBehaviour
 #else
             files[i] = UnityWebRequest.Get("file:/" + path[i]);
 #endif
-            Events.Log(path[i]);
+            Debug.Log(path[i]);
 
             yield return files[i].SendWebRequest();
             form.AddField("uuid", "123");
