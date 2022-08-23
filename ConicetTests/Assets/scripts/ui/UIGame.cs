@@ -12,6 +12,7 @@ namespace Conicet.UI
         [SerializeField] Text testField;
         [SerializeField] GameObject panel;
         [SerializeField] AudioRecorder audioRecorder;
+        AudioSource audioSource;
         public states state;
         public enum states
         {
@@ -19,9 +20,11 @@ namespace Conicet.UI
             RECORDING            
         }
         float timer;
+        int id;
 
         void Start()
         {
+            audioSource = GetComponent<AudioSource>();
             panel.SetActive(false);
         }
         public void Init()
@@ -29,8 +32,14 @@ namespace Conicet.UI
             timer = 0;
             state = states.RECORDING;
             panel.SetActive(true);
-            audioRecorder.Init(5);
+            audioRecorder.Init(1000);
             testField.text = "TEST " + Data.Instance.GetFileName();
+            Next();
+        }
+        void OnAudioLoaded(AudioClip audioClip)
+        {
+            audioSource.clip = audioClip;
+            audioSource.Play();
         }
         public void Cancel()
         {
@@ -39,7 +48,12 @@ namespace Conicet.UI
         }
         public void Next()
         {
-            audioRecorder.Stop();
+            DatabaseContent.ConfigProfiles active = Data.Instance.databaseContent.GetActive();
+            string clipName = active.content.session.levels[0].stages[id].asset;
+            print("clipName" + clipName);
+            StartCoroutine(Data.Instance.databaseContent.GetMp3(clipName, OnAudioLoaded));
+            id++;
+            // audioRecorder.Stop();
         }
         private void Update()
         {

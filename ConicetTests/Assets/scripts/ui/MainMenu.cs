@@ -22,10 +22,10 @@ public class MainMenu : MonoBehaviour
         dataField.text = "";
         tabletField.text = "TABLET " + Data.Instance.tabletID;
 
-        if (Data.Instance.databaseContent.activeText == null)
+        if (Data.Instance.databaseContent.GetActive() == null)
             testTitleField.text = "";
         else
-            testTitleField.text = Data.Instance.databaseContent.activeText.name;
+            testTitleField.text = Data.Instance.databaseContent.GetActive().name;
 
         testField.text = "EMPEZAR [" + Data.Instance.GetFileName() + "]";
     }

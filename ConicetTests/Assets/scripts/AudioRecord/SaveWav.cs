@@ -5,7 +5,6 @@ using System.Collections.Generic;
 
 public static class SaveWav
 {
-
     const int HEADER_SIZE = 44;
 
     public static bool Save(string filename, AudioClip clip)
@@ -90,7 +89,6 @@ public static class SaveWav
 
         return fileStream;
     }
-
     static void ConvertAndWrite(FileStream fileStream, AudioClip clip)
     {
 

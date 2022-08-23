@@ -3,10 +3,12 @@ using System.Collections.Generic;
 using UnityEngine;
 using System;
 using UnityEngine.Networking;
+using System.IO;
 
 public class DatabaseContent : MonoBehaviour
 {
-    public ConfigProfiles activeText;
+    public int version;
+    [SerializeField] ConfigProfiles activeTest;
 
     public string url;
     public Main main;
@@ -57,13 +59,16 @@ public class DatabaseContent : MonoBehaviour
         public string background;
         public string name;
         public int recording_time;
-        public Stages stages;
+        public Stages[] stages;
     }
     [Serializable]
     public class Stages
     {
-        public string object_;
+        public string asset;
     }
+
+
+
     public IEnumerator Load(System.Action OnLoaded)
     {
         using (UnityWebRequest www = UnityWebRequest.Get(url))
@@ -73,31 +78,47 @@ public class DatabaseContent : MonoBehaviour
             if (www.isNetworkError || www.isHttpError)
             {
                 Debug.Log(www.error);
+                Init(PlayerPrefs.GetString("json"), OnLoaded); // Init: data guardada local
             }
             else
             {
                 string json = www.downloadHandler.text;
-                main = JsonUtility.FromJson<Main>(json);
-
-                // Or retrieve results as binary data
-                byte[] results = www.downloadHandler.data;
-
-                int active= PlayerPrefs.GetInt("activeText");
-                if (active != 0)
-                    SetActive(active);
-
-                OnLoaded();
-
+                PlayerPrefs.SetString("json", json); // Init: data del server
+                Init(json, OnLoaded);
             }
         }
     }
+    private void Init(string json, System.Action OnLoaded)
+    {
+        main = JsonUtility.FromJson<Main>(json);
+        //if (main.version > PlayerPrefs.GetInt("version", 0))
+        //{
+            LoadDataContent();
+        //}
+
+        version = main.version;
+        PlayerPrefs.SetInt("version", version);
+
+        int active = PlayerPrefs.GetInt("activeText");
+        if (active != 0)
+            SetActive(active);
+
+        OnLoaded();
+    }
+    void AllReady()
+    {
+        Debug.Log("All assets ready");
+    }
+
+
+
     public void SetActive(int id)
     {
         print("id: " + id);
         PlayerPrefs.SetInt("activeText", id);
         foreach (ConfigProfiles cf in main.config_profiles)
             if (cf.id == id)
-                activeText = cf;
+                activeTest = cf;
     }
     public ConfigProfiles GetConfig(string name)
     {
@@ -105,5 +126,132 @@ public class DatabaseContent : MonoBehaviour
             if (cf.name == name)
                 return cf;
         return null;
+    }
+    public ConfigProfiles GetActive()
+    {
+        return activeTest;
+    }
+    public GameObjects GetDataFor(string name)
+    {
+        foreach (GameObjects go in main.game_objects)
+            if (go.name == name)
+                return go;
+        return null;
+    }
+
+
+    string fileName;
+    string fullpathWav;
+    string fullpathSprite;
+    GameObjects go;
+    int dataContentID = 0;
+
+    void LoadDataContent()
+    {
+        if (dataContentID >= main.game_objects.Length)
+            AllReady();
+        else if (!FileExists(main.game_objects[dataContentID].name))
+        {
+            go = main.game_objects[dataContentID];
+            fullpathSprite = go.image;
+            fullpathWav = go.sound_sprite;
+            fileName = go.name;
+            Debug.Log("load " + go.name + " id:" + dataContentID + " de: " + main.game_objects.Length);
+            LoadWav();
+            dataContentID++;
+        }
+        else //Loop
+        {
+            dataContentID++;
+            Debug.Log("File exists eon disk: " + dataContentID );
+            LoadDataContent();
+        }
+    }
+    bool FileExists(string fileName)
+    {
+        string filePath = Application.persistentDataPath + "/" + fileName + ".mp3";
+        if (System.IO.File.Exists(filePath))
+            return true;
+        return false;
+    }
+    void LoadWav()
+    {
+        StartCoroutine(LoadWav(LoadSprite));
+    }
+    void LoadSprite()
+    {
+        StartCoroutine(LoadSprite(LoadDataContent));
+    }
+
+
+    IEnumerator LoadSprite(System.Action OnDone)
+    {
+        WWW www = new WWW(fullpathSprite);
+        yield return www;
+        SaveImage(www.texture);
+        OnDone();
+    }
+
+
+    IEnumerator LoadWav(System.Action OnDone)
+    {
+        print("LoadFile " + fullpathWav);
+        using (var www = new WWW(fullpathWav))
+        {
+            yield return www;
+
+            AudioClip audioClip = www.GetAudioClip();
+            SaveMp3Locally(audioClip);
+
+            OnDone();
+        }
+    }
+    void SaveMp3Locally(AudioClip audioClip)
+    {
+        string fullFileName = Application.persistentDataPath + "/" + fileName + ".mp3";
+        Debug.Log("save: " + fullFileName);
+        EncodeMP3.convert(audioClip, fullFileName, 128);
+    }
+    void SaveImage(Texture2D texture2d)
+    {
+        string fullFileName = Application.persistentDataPath + "/" + fileName + ".png";
+        byte[] fileData = texture2d.EncodeToPNG();
+        using (var fs = new FileStream(fullFileName, FileMode.Create, FileAccess.Write))
+        {
+            fs.Write(fileData, 0, fileData.Length);
+        }
+    }
+
+    public Texture2D GetTexture(string fileName, System.Action<AudioClip> OnDone)
+    {
+        string fullFileName = Application.persistentDataPath + "/" + fileName + ".png";
+        Texture2D tex = null;
+        byte[] fileData;
+
+        if (File.Exists(fullFileName))
+        {
+            fileData = File.ReadAllBytes(fullFileName);
+            tex = new Texture2D(2, 2);
+            tex.LoadImage(fileData); //..this will auto-resize the texture dimensions.
+        }
+        return tex;
+    }
+    public IEnumerator GetMp3(string fileName, System.Action<AudioClip> OnDone)
+    {
+        string fullFileName = Application.persistentDataPath + "/" + fileName + ".mp3";
+        using (UnityWebRequest www = UnityWebRequestMultimedia.GetAudioClip(fullFileName, AudioType.MPEG))
+        {
+            yield return www.SendWebRequest();
+
+            if (www.isNetworkError || www.isHttpError)
+            {
+                Debug.Log(www.error);
+            }
+            else
+            {
+                AudioClip myClip = DownloadHandlerAudioClip.GetContent(www);
+                OnDone(myClip);
+            }
+        }
     }
 }
