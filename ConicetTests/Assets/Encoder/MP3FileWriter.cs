@@ -161,7 +161,7 @@ namespace NAudio.Lame
 				if (format.Channels == 1)
 					_encode = encode_pcm_16_mono;
 				else
-					_encode = encode_pcm_16_stereo;
+					_encode = encode_pcm_16_mono;
 			}
 			else
 			{
@@ -317,17 +317,17 @@ namespace NAudio.Lame
 
 		private int encode_pcm_16_stereo()
 		{
-			return _lame.Write(inBuffer.shorts, inPosition / 2, outBuffer, outBuffer.Length, false);
+			return _lame.Write(inBuffer.shorts, inPosition / 2, outBuffer, outBuffer.Length, true);
 		}
 
 		private int encode_float_mono()
 		{
-			return _lame.Write(inBuffer.floats, inPosition / 4, outBuffer, outBuffer.Length, true);
+			return _lame.Write(inBuffer.floats, inPosition / 2, outBuffer, outBuffer.Length, true);
 		}
 
 		private int encode_float_stereo()
 		{
-			return _lame.Write(inBuffer.floats, inPosition / 4, outBuffer, outBuffer.Length, false);
+			return _lame.Write(inBuffer.floats, inPosition / 2, outBuffer, outBuffer.Length, true);
 		}
 
 		// Selected encoding write function

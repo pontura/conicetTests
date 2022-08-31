@@ -20,6 +20,7 @@ namespace Conicet.UI
         }
         public void Init()
         {
+            Data.Instance.uploadWav.Init();
             panel.SetActive(true);
             tabletInputField.text = Data.Instance.tabletID.ToString();
             AddTests();
@@ -44,12 +45,16 @@ namespace Conicet.UI
         }
         public void Refresh()
         {
-            print("REFRWSG");
+            print("Refresh");
         }
         public void Send()
         {
-            print("send");
+            Data.Instance.uploadWav.UploadAll(OnDone);
+            print("Send");
         }
-
+        void OnDone(bool isOk)
+        {
+            Debug.Log("is ok: " + isOk);
+        }
     }
 }

@@ -25,13 +25,18 @@ public class MainMenu : MonoBehaviour
         if (Data.Instance.databaseContent.GetActive() == null)
             testTitleField.text = "";
         else
-            testTitleField.text = Data.Instance.databaseContent.GetActive().name;
+            Invoke("Delayed", 0.15f);
+        testField.text = "EMPEZAR [" + Data.Instance.GetFileName(true) + "]";
+    }
+    void Delayed()
+    {
+        testTitleField.text = Data.Instance.databaseContent.GetActive().name;
 
-        testField.text = "EMPEZAR [" + Data.Instance.GetFileName() + "]";
     }
     public void Clkicked()
     {
         SetOff();
+        Data.Instance.SetNewUser();
         GetComponent<Conicet.UI.UIGame>().Init();
     }
     void SetOff()

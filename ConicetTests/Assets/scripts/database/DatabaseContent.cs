@@ -69,8 +69,9 @@ public class DatabaseContent : MonoBehaviour
 
 
 
-    public IEnumerator Load(System.Action OnLoaded)
+    public IEnumerator Load(System.Action OnLoaded, bool loadFromServer)
     {
+        Debug.Log("Load from " + url);
         using (UnityWebRequest www = UnityWebRequest.Get(url))
         {
             yield return www.Send();
@@ -206,11 +207,16 @@ public class DatabaseContent : MonoBehaviour
             OnDone();
         }
     }
-    void SaveMp3Locally(AudioClip audioClip)
+    public void SaveMp3Locally(AudioClip audioClip)
     {
         string fullFileName = Application.persistentDataPath + "/" + fileName + ".mp3";
         Debug.Log("save: " + fullFileName);
         EncodeMP3.convert(audioClip, fullFileName, 128);
+    }
+    public void SaveMp3Locally(AudioClip audioClip, string fullFileName)
+    {
+        Debug.Log("SaveMp3Locally: " + fullFileName);
+        EncodeMP3.convert(audioClip, fullFileName, 64);
     }
     void SaveImage(Texture2D texture2d)
     {
@@ -251,6 +257,25 @@ public class DatabaseContent : MonoBehaviour
             {
                 AudioClip myClip = DownloadHandlerAudioClip.GetContent(www);
                 OnDone(myClip);
+            }
+        }
+    }
+    public IEnumerator GetImage(string fileName, System.Action<Texture2D> OnDone)
+    {
+        string fullFileName = Application.persistentDataPath + "/" + fileName + ".png";
+        Debug.Log("Get image: " + fullFileName);
+        using (UnityWebRequest www = UnityWebRequestTexture.GetTexture(fullFileName))
+        {
+            yield return www.SendWebRequest();
+
+            if (www.isNetworkError || www.isHttpError)
+            {
+                Debug.Log(www.error);
+            }
+            else
+            {
+                Texture2D sprite = DownloadHandlerTexture.GetContent(www);
+                OnDone(sprite);
             }
         }
     }

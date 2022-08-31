@@ -1,150 +1,163 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 using System;
 using System.IO;
 using UnityEngine.Networking;
 
 public class UploadWav : MonoBehaviour
 {
-   // string url = "http://pontura.com/conicet/uploadAudio.php";
+    // string url = "http://pontura.com/conicet/uploadAudio.php";
     string url = "http://ciipme-voc.wnpower.host/produccion/sync/upload/";
-    [SerializeField] AudioSource audioSource;
 
+    System.Action<bool> OnDone;
+    int id = 0;
+    public List<string> paths;
+    [SerializeField] Text field;
+    public int lastIDSended;
     private void Start()
     {
-      //  StartCoroutine(UploadAll());
+        lastIDSended = PlayerPrefs.GetInt("lastIDSended", 0);
     }
-    public void UploadToWeb(AudioClip clip, string filename)
+    public void Init()
     {
-        var samples = new float[clip.samples];
-
-        clip.GetData(samples, 0);
-
-        Int16[] intData = new Int16[samples.Length];
-        Byte[] bytesData = new Byte[samples.Length * 2];
-
-        int rescaleFactor = 32767;
-
-        for (int i = 0; i < samples.Length; i++)
-        {
-            intData[i] = (short)(samples[i] * rescaleFactor);
-            Byte[] byteArr = new Byte[2];
-            byteArr = BitConverter.GetBytes(intData[i]);
-            byteArr.CopyTo(bytesData, i * 2);
-        }
-       // StartCoroutine(UploadFile(bytesData));
-        StartCoroutine(Send(filename));
+        if (lastIDSended > 0)
+            field.text = "Último enviado: " + lastIDSended;
     }
-
-    IEnumerator Send(string filename)
+    public void UploadAll(System.Action<bool> OnDone)
     {
-        yield return new WaitForSeconds(5);
-        string[] path = new string[1];
-        path[0] = filename;
+        id = 0;
+        this.OnDone = OnDone;
+        paths = new List<string>();
 
-        UnityWebRequest[] files = new UnityWebRequest[path.Length];
-
-        WWWForm form = new WWWForm();
-
-        for (int i = 0; i < files.Length; i++)
-        {
-#if UNITY_EDITOR
-            files[i] = UnityWebRequest.Get(path[i]);
-#else
-            files[i] = UnityWebRequest.Get("file:/" + path[i]);
-#endif
-            Debug.Log(path[i]);
-
-            yield return files[i].SendWebRequest();
-            form.AddField("uuid", "123");
-            form.AddBinaryData("files", files[i].downloadHandler.data, Path.GetFileName(path[i]));
-
-        }
-
-        UnityWebRequest req = UnityWebRequest.Post(url, form);
-        yield return req.SendWebRequest();
-
-        if (req.isHttpError || req.isNetworkError)
-            Events.Log(req.error);
-        else
-            Events.Log("Uploaded " + filename);
-    }
-
-    IEnumerator UploadAll()
-    {
-        List<string> path = new List<string>();
-
-        string worldsFolder = Application.persistentDataPath;
+        string worldsFolder = Application.persistentDataPath + "/tests/";
+        print("upload all : " + worldsFolder);
         DirectoryInfo d = new DirectoryInfo(worldsFolder);
-        foreach (var file in d.GetFiles("*.wav"))
+        foreach (var file in d.GetFiles("*.mp3"))
         {
-            path.Add(file.Name);
-            StartCoroutine(LoadFile(file.Name));
+            string fileName = file.Name.Split("."[0])[0];
+
+            if (int.Parse(fileName) > lastIDSended)
+            {
+                print("fileName: " + fileName + "  lastIDSended " + lastIDSended);
+                paths.Add(fileName);
+            }
+            // StartCoroutine(LoadFile(file.Name));
         }
-
-        
-
-        UnityWebRequest[] files = new UnityWebRequest[path.Count];
-
-        WWWForm form = new WWWForm();
-
-        for (int i = 0; i < files.Length; i++)
-        {
-
-#if UNITY_EDITOR
-            string p = Application.persistentDataPath + "/" + path[i];
-            files[i] = UnityWebRequest.Get(p);
-            print(p);
-#else
-            
-            string p = "file://" + Application.persistentDataPath + "/" + path[i];
-            files[i] = UnityWebRequest.Get(p);
-#endif
-
-            yield return files[i].SendWebRequest();
-            form.AddBinaryData("files[]", files[i].downloadHandler.data, Path.GetFileName(path[i]));
-            
-        }
-
-        UnityWebRequest req = UnityWebRequest.Post(url, form);
-        yield return req.SendWebRequest();
-
-        if (req.isHttpError || req.isNetworkError)
-            Events.Log(req.error);
+        if(paths.Count == 0)
+            field.text = "Nada nuevo para enviar!";
         else
-            Debug.Log("Uploaded ");
+        {
+            field.text = "enviar: " + paths.Count;
+            SendNext();
+        }
+    }
+    void SendNext()
+    {
+        StartCoroutine(Upload(paths[id], OnReady));        
+    }
+    void OnReady(bool isOk)
+    {
+        field.text = "Enviando: " + paths[id];
+
+        id++;
+        if (id <= paths.Count-1)
+            SendNext();
+        else
+        {
+            lastIDSended = int.Parse(paths[id - 1]);
+            field.text = "Enviados " + id;
+            PlayerPrefs.SetInt("lastIDSended", lastIDSended);
+        }
     }
 
-    IEnumerator LoadFile(string fullpath)
+
+
+    //        UnityWebRequest[] files = new UnityWebRequest[path.Count];
+
+    //        WWWForm form = new WWWForm();
+
+    //        for (int i = 0; i < files.Length; i++)
+    //        {
+
+    //#if UNITY_EDITOR
+    //            string p = Application.persistentDataPath + "/test/" + path[i];
+    //            files[i] = UnityWebRequest.Get(p);
+    //            print(p);
+    //#else
+
+    //            string p = "file://" + Application.persistentDataPath + "/test/" + path[i];
+    //            files[i] = UnityWebRequest.Get(p);
+    //#endif
+
+    //            yield return files[i].SendWebRequest();
+    //            form.AddBinaryData("files[]", files[i].downloadHandler.data, Path.GetFileName(path[i]));
+
+    //        }
+
+    //        UnityWebRequest req = UnityWebRequest.Post(url, form);
+    //        yield return req.SendWebRequest();
+
+    //        if (req.isHttpError || req.isNetworkError)
+    //            Events.Log(req.error);
+    //        else
+    //            Debug.Log("Uploaded ");
+    // }
+
+    IEnumerator Upload(string filename, System.Action<bool> OnReady)
     {
-        AudioClip temp = null;
+        UnityWebRequest request = new UnityWebRequest();
+        WWWForm form = new WWWForm();
 
+
+        string path = Application.persistentDataPath + "/tests/" + filename + ".mp3";
 #if UNITY_EDITOR
-        string p = Application.persistentDataPath + "/" + fullpath;
+        request = UnityWebRequest.Get(path);
 #else
-            
-            string p = "file://" + Application.persistentDataPath + "/" + fullpath;
+        request = UnityWebRequest.Get("file:/" + path);
 #endif
+        yield return request.SendWebRequest();
+        form.AddBinaryData("files", request.downloadHandler.data, filename + ".mp3");
 
-        print("LoadFile " + p);
-        using (UnityWebRequest www = UnityWebRequestMultimedia.GetAudioClip(p, AudioType.WAV))
+
+
+        path = Application.persistentDataPath + "/tests/" + filename + ".json";
+        using (UnityWebRequest www = UnityWebRequest.Get(path))
         {
-            yield return www.SendWebRequest();
-            if (www.isNetworkError)
+            yield return www.Send();
+
+            if (www.isNetworkError || www.isHttpError)
             {
                 Debug.Log(www.error);
             }
             else
             {
-                temp = DownloadHandlerAudioClip.GetContent(www);
-                audioSource.clip = temp;
-                audioSource.Play();
-            
+                string jsonData = (www.downloadHandler.text);
+                form.AddField("data", jsonData);
             }
         }
 
+
+        form.AddField("uuid", filename);
+        Debug.Log("url: " + url + form);
+
+        UnityWebRequest req = UnityWebRequest.Post(url, form);
+        yield return req.SendWebRequest();
+
+        if (req.isHttpError || req.isNetworkError)
+        {
+            Events.Log(req.error);
+            OnReady(false);
+        }
+        else
+        {
+            Events.Log("Uploaded " + filename);
+            OnReady(true);
+        }
     }
+   
+
 
 
 }

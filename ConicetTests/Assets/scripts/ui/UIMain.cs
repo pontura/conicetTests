@@ -32,8 +32,6 @@ namespace Conicet.UI
         }
         public void Init()
         {
-            Data.Instance.tabletID = PlayerPrefs.GetInt("tabletID", 0);
-            Data.Instance.userAutoIncrementID = PlayerPrefs.GetInt("userAutoIncrementID", 0);
 
             if (Data.Instance.tabletID == 0)
                 GetComponent<DatabaseTablet>().Init();
