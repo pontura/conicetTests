@@ -82,9 +82,6 @@ namespace Conicet.UI
                 else
                 {
                     SetRewardPanel();
-                    levelID++;
-                    stageID = 0;
-                    Next();
                 }
                 Data.Instance.testData.Add(timer);
             }
@@ -111,13 +108,25 @@ namespace Conicet.UI
             timer = 0;
         }
         int rewardInt;
+        bool rewardClicked;
         public void SetRewardPanel()
         {
+            rewardClicked = false;
             rewardPanel.SetActive(true);
-            Invoke("SetRewardOff", 3);
+            Invoke("OnRewardClicked", 10);
             rewardInt++;
             if (rewardInt >= rewards.Length) rewardInt = 0;
             rewardThumb.sprite = rewards[rewardInt];
+        }
+        public void OnRewardClicked()
+        {
+            if (rewardClicked) return;
+            rewardClicked = true;
+            CancelInvoke();
+            levelID++;
+            stageID = 0;
+            Next();
+            SetRewardOff();
         }
         public void SetRewardOff()
         {

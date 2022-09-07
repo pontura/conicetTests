@@ -10,7 +10,6 @@ namespace Conicet.UI
     {
         static UIMain mInstance = null;
         [SerializeField] Text debugField;
-        [SerializeField] Text field;
         [SerializeField] MainMenu mainMenu;
 
         public static UIMain Instance { get { return mInstance; } }
@@ -22,17 +21,27 @@ namespace Conicet.UI
         {
             debugField.text = "";
             Events.Log += Log;
-            string worldsFolder = Application.persistentDataPath;
-            DirectoryInfo d = new DirectoryInfo(worldsFolder);
-            foreach (var file in d.GetFiles("*.wav"))
+            //string worldsFolder = Application.persistentDataPath;
+            //DirectoryInfo d = new DirectoryInfo(worldsFolder);
+            //foreach (var file in d.GetFiles("*.wav"))
+            //{
+            //    field.text += "file:/" + file;
+            //}
+        }
+        bool started;
+        private void Update()
+        {
+            if (started) return;
+            if(Data.Instance.databaseContent.allLoaded)
             {
-                field.text += "file:/" + file;
+                started = true;
+                Init();
             }
-            Init();
         }
         public void Init()
         {
-
+            debugField.text = "";
+            Debug.Log("Init");
             if (Data.Instance.tabletID == 0)
                 GetComponent<DatabaseTablet>().Init();
             else
@@ -44,12 +53,13 @@ namespace Conicet.UI
         }
         void OnDestroy()
         {
-            Events.Log += Log;
+            Events.Log -= Log;
         }
         void Log(string s)
         {
             CancelInvoke();
             debugField.text = s;
+            Debug.Log(s);
         }
         private void Reset()
         {

@@ -7,6 +7,8 @@ using System.IO;
 
 public class DatabaseContent : MonoBehaviour
 {
+    [SerializeField] AudioRecorder audioRecForDEBUG;
+    public bool allLoaded;
     public int version;
     [SerializeField] ConfigProfiles activeTest;
 
@@ -71,7 +73,7 @@ public class DatabaseContent : MonoBehaviour
 
     public IEnumerator Load(System.Action OnLoaded, bool loadFromServer)
     {
-        Debug.Log("Load from " + url);
+        Events.Log("Load from " + url);
         using (UnityWebRequest www = UnityWebRequest.Get(url))
         {
             yield return www.Send();
@@ -108,7 +110,8 @@ public class DatabaseContent : MonoBehaviour
     }
     void AllReady()
     {
-        Debug.Log("All assets ready");
+        Events.Log("All assets ready");
+        allLoaded = true;
     }
 
 
@@ -157,14 +160,14 @@ public class DatabaseContent : MonoBehaviour
             fullpathSprite = go.image;
             fullpathWav = go.sound_sprite;
             fileName = go.name;
-            Debug.Log("load " + go.name + " id:" + dataContentID + " de: " + main.game_objects.Length);
+            Events.Log("Load: " + go.name + " id:" + dataContentID + " de: " + main.game_objects.Length);
             LoadWav();
             dataContentID++;
         }
         else //Loop
         {
             dataContentID++;
-            Debug.Log("File exists eon disk: " + dataContentID );
+            Events.Log("File exists eon disk: " + dataContentID );
             LoadDataContent();
         }
     }
@@ -202,7 +205,9 @@ public class DatabaseContent : MonoBehaviour
             yield return www;
 
             AudioClip audioClip = www.GetAudioClip();
+            yield return new WaitForEndOfFrame();
             SaveMp3Locally(audioClip);
+
 
             OnDone();
         }
@@ -210,12 +215,12 @@ public class DatabaseContent : MonoBehaviour
     public void SaveMp3Locally(AudioClip audioClip)
     {
         string fullFileName = Application.persistentDataPath + "/" + fileName + ".mp3";
-        Debug.Log("save: " + fullFileName);
+        Events.Log("save: " + fullFileName);
         EncodeMP3.convert(audioClip, fullFileName, 128);
     }
     public void SaveMp3Locally(AudioClip audioClip, string fullFileName)
     {
-        Debug.Log("SaveMp3Locally: " + fullFileName);
+        Events.Log("SaveMp3Locally: " + fullFileName);
         EncodeMP3.convert(audioClip, fullFileName, 64);
     }
     void SaveImage(Texture2D texture2d)
@@ -244,7 +249,13 @@ public class DatabaseContent : MonoBehaviour
     }
     public IEnumerator GetMp3(string fileName, System.Action<AudioClip> OnDone)
     {
-        string fullFileName = Application.persistentDataPath + "/" + fileName + ".mp3";
+        string fullFileName = "";
+#if UNITY_EDITOR
+#elif UNITY_ANDROID
+        fullFileName = "file://";
+#endif
+        fullFileName += Application.persistentDataPath + "/" + fileName + ".mp3";
+        print("GetMp3: " + fullFileName);
         using (UnityWebRequest www = UnityWebRequestMultimedia.GetAudioClip(fullFileName, AudioType.MPEG))
         {
             yield return www.SendWebRequest();
@@ -262,7 +273,12 @@ public class DatabaseContent : MonoBehaviour
     }
     public IEnumerator GetImage(string fileName, System.Action<Texture2D> OnDone)
     {
-        string fullFileName = Application.persistentDataPath + "/" + fileName + ".png";
+        string fullFileName = "";
+#if UNITY_EDITOR
+#elif UNITY_ANDROID
+        fullFileName = "file://";
+#endif
+        fullFileName += Application.persistentDataPath + "/" + fileName + ".png";
         Debug.Log("Get image: " + fullFileName);
         using (UnityWebRequest www = UnityWebRequestTexture.GetTexture(fullFileName))
         {

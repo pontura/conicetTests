@@ -15,7 +15,28 @@ public class AudioRecorder : MonoBehaviour
     private void Start()
     {
         audioSource = GetComponent<AudioSource>();
+       // StartCoroutine(aaaaaaaaaaa());
     }
+
+    //IEnumerator aaaaaaaaaaa()
+    //{
+    //    string urlDemo = "http://ciipme-voc.wnpower.host/pruebas_produccion/esp2022/audios/esp2022-anteojo.mp3";
+    //    print("LoadFile " + urlDemo);
+    //    using (var www = new WWW(urlDemo))
+    //    {
+    //        yield return www;
+    //        print("loaded " + urlDemo);
+    //        AudioClip audioClip = www.GetAudioClip();
+    //        audioSource.clip = audioClip;
+    //        audioSource.Play();
+    //    }
+    //}
+    public void PPPPP(AudioClip audioClip)
+    {
+        audioSource.clip = audioClip;
+        audioSource.Play();
+    }
+
     public void Init(float timer)
     {
         Invoke("Stop", timer);
