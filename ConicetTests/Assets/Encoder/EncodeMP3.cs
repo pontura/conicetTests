@@ -22,21 +22,21 @@ public static class EncodeMP3
 {
 
 
-	public static void convert (AudioClip clip, string path, int bitRate)
-	{
+	public static void convert (AudioClip clip, string path, int bitRate, bool forceMono)
+    {
 
 		if (!path.EndsWith (".mp3"))
 			path = path + ".mp3";
 		
-		ConvertAndWrite (clip, path, bitRate);
+		ConvertAndWrite (clip, path, bitRate, forceMono);
 
 	}
 
 
 	//  derived from Gregorio Zanon's script
-	private static void ConvertAndWrite (AudioClip clip, string path, int bitRate)
+	private static void ConvertAndWrite (AudioClip clip, string path, int bitRate, bool forceMono)
 	{
-		var samples = new float[clip.samples * clip.channels];
+        var samples = new float[clip.samples * clip.channels];
 
 		clip.GetData (samples, 0);
 
@@ -56,18 +56,17 @@ public static class EncodeMP3
 			byteArr.CopyTo (bytesData, i * 2);
 		}
 
-		File.WriteAllBytes (path, ConvertWavToMp3 (bytesData,bitRate));
+		File.WriteAllBytes (path, ConvertWavToMp3 (bytesData,bitRate, forceMono));
 	}
 
 
 
-	private static byte[] ConvertWavToMp3 (byte[] wavFile, int bitRate)
+	private static byte[] ConvertWavToMp3 (byte[] wavFile, int bitRate, bool forceMono)
 	{
-
-		var retMs = new MemoryStream ();
+        var retMs = new MemoryStream ();
 		var ms = new MemoryStream (wavFile);
 		var rdr = new RawSourceWaveStream (ms, new WaveFormat ());
-		var wtr = new LameMP3FileWriter (retMs, rdr.WaveFormat, bitRate);
+		var wtr = new LameMP3FileWriter (retMs, rdr.WaveFormat, bitRate, forceMono);
 
 		rdr.CopyTo (wtr);
 		return retMs.ToArray ();

@@ -7,7 +7,7 @@ public class ExampleConvert : MonoBehaviour {
 	void Start () {
 		
 
-		EncodeMP3.convert (clip, Application.dataPath + "/convertedMp3.mp3", 128);
+		EncodeMP3.convert (clip, Application.dataPath + "/convertedMp3.mp3", 128, false);
 
 	
 	}

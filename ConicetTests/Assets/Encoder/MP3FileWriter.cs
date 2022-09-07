@@ -124,8 +124,8 @@ namespace NAudio.Lame
 		/// <param name="outFileName">Name of file to create</param>
 		/// <param name="format">Input WaveFormat</param>
 		/// <param name="quality">LAME quality preset</param>
-		public LameMP3FileWriter(string outFileName, WaveFormat format, LAMEPreset quality)
-			: this(File.Create(outFileName), format, quality)
+		public LameMP3FileWriter(string outFileName, WaveFormat format, LAMEPreset quality, bool forceMono)
+			: this(File.Create(outFileName), format, quality, forceMono)
 		{
 			this.disposeOutput = true;
 		}
@@ -134,11 +134,12 @@ namespace NAudio.Lame
 		/// <param name="outStream">Stream to write encoded data to</param>
 		/// <param name="format">Input WaveFormat</param>
 		/// <param name="quality">LAME quality preset</param>
-		public LameMP3FileWriter(Stream outStream, WaveFormat format, LAMEPreset quality)
+		public LameMP3FileWriter(Stream outStream, WaveFormat format, LAMEPreset quality, bool forceMono)
 			: base()
 		{
-			// sanity check
-			if (outStream == null)
+            this.forceMono = forceMono; //pontura:
+            // sanity check
+            if (outStream == null)
 				throw new ArgumentNullException("outStream");
 			if (format == null)
 				throw new ArgumentNullException("format");
@@ -196,8 +197,8 @@ namespace NAudio.Lame
 		/// <param name="outFileName">Name of file to create</param>
 		/// <param name="format">Input WaveFormat</param>
 		/// <param name="bitRate">Output bit rate in kbps</param>
-		public LameMP3FileWriter(string outFileName, WaveFormat format, int bitRate)
-			: this(File.Create(outFileName), format, bitRate)
+		public LameMP3FileWriter(string outFileName, WaveFormat format, int bitRate, bool forceMono)
+			: this(File.Create(outFileName), format, bitRate, forceMono)
 		{
 			this.disposeOutput = true;
 		}
@@ -206,9 +207,10 @@ namespace NAudio.Lame
 		/// <param name="outStream">Stream to write encoded data to</param>
 		/// <param name="format">Input WaveFormat</param>
 		/// <param name="bitRate">Output bit rate in kbps</param>
-		public LameMP3FileWriter(Stream outStream, WaveFormat format, int bitRate)
+		public LameMP3FileWriter(Stream outStream, WaveFormat format, int bitRate, bool forceMono)
 			: base()
 		{
+            this.forceMono = forceMono;
 			// sanity check
 			if (outStream == null)
 				throw new ArgumentNullException("outStream");
@@ -230,14 +232,14 @@ namespace NAudio.Lame
 			// select encoder function that matches data format
 			if (format.Encoding == WaveFormatEncoding.Pcm)
 			{
-				if (format.Channels == 1)
+				if (format.Channels == 1 || forceMono)
 					_encode = encode_pcm_16_mono;
 				else
 					_encode = encode_pcm_16_stereo;
 			}
 			else
 			{
-				if (format.Channels == 1)
+				if (format.Channels == 1 || forceMono)
 					_encode = encode_float_mono;
 				else
 					_encode = encode_float_stereo;
@@ -308,8 +310,8 @@ namespace NAudio.Lame
 		long InputByteCount = 0;
 		long OutputByteCount = 0;
 
-		// encoder write functions, one for each supported input wave format
-		
+        // encoder write functions, one for each supported input wave format
+        bool forceMono;
 		private int encode_pcm_16_mono()
 		{
 			return _lame.Write(inBuffer.shorts, inPosition / 2, outBuffer, outBuffer.Length, true);
@@ -317,7 +319,7 @@ namespace NAudio.Lame
 
 		private int encode_pcm_16_stereo()
 		{
-			return _lame.Write(inBuffer.shorts, inPosition / 2, outBuffer, outBuffer.Length, true);
+			return _lame.Write(inBuffer.shorts, inPosition / 2, outBuffer, outBuffer.Length, forceMono);
 		}
 
 		private int encode_float_mono()
@@ -327,7 +329,7 @@ namespace NAudio.Lame
 
 		private int encode_float_stereo()
 		{
-			return _lame.Write(inBuffer.floats, inPosition / 2, outBuffer, outBuffer.Length, true);
+			return _lame.Write(inBuffer.floats, inPosition / 2, outBuffer, outBuffer.Length, forceMono);
 		}
 
 		// Selected encoding write function

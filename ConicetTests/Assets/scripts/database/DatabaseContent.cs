@@ -216,12 +216,12 @@ public class DatabaseContent : MonoBehaviour
     {
         string fullFileName = Application.persistentDataPath + "/" + fileName + ".mp3";
         Events.Log("save: " + fullFileName);
-        EncodeMP3.convert(audioClip, fullFileName, 128);
+        EncodeMP3.convert(audioClip, fullFileName, 128, false);
     }
     public void SaveMp3Locally(AudioClip audioClip, string fullFileName)
     {
         Events.Log("SaveMp3Locally: " + fullFileName);
-        EncodeMP3.convert(audioClip, fullFileName, 64);
+        EncodeMP3.convert(audioClip, fullFileName, 128, true);
     }
     void SaveImage(Texture2D texture2d)
     {
