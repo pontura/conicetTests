@@ -73,7 +73,7 @@ public class DatabaseContent : MonoBehaviour
 
     public IEnumerator Load(System.Action OnLoaded, bool loadFromServer)
     {
-        Events.Log("Load from " + url);
+        Debug.Log("Carga: " + url);
         using (UnityWebRequest www = UnityWebRequest.Get(url))
         {
             yield return www.Send();
@@ -110,7 +110,7 @@ public class DatabaseContent : MonoBehaviour
     }
     void AllReady()
     {
-        Events.Log("All assets ready");
+        Events.Log("Todo Listo!");
         allLoaded = true;
     }
 
@@ -160,14 +160,14 @@ public class DatabaseContent : MonoBehaviour
             fullpathSprite = go.image;
             fullpathWav = go.sound_sprite;
             fileName = go.name;
-            Events.Log("Load: " + go.name + " id:" + dataContentID + " de: " + main.game_objects.Length);
+            Events.Log("Nuevo: " + go.name + " (" + dataContentID + " / " + main.game_objects.Length + ")");
             LoadWav();
             dataContentID++;
         }
         else //Loop
         {
+            Events.Log("Ya existe: " + dataContentID );
             dataContentID++;
-            Events.Log("File exists eon disk: " + dataContentID );
             LoadDataContent();
         }
     }
@@ -205,9 +205,9 @@ public class DatabaseContent : MonoBehaviour
             yield return www;
 
             AudioClip audioClip = www.GetAudioClip();
-            yield return new WaitForEndOfFrame();
+            yield return new WaitForSeconds(0.25f);
             SaveMp3Locally(audioClip);
-
+            yield return new WaitForSeconds(0.25f);
 
             OnDone();
         }
@@ -215,12 +215,12 @@ public class DatabaseContent : MonoBehaviour
     public void SaveMp3Locally(AudioClip audioClip)
     {
         string fullFileName = Application.persistentDataPath + "/" + fileName + ".mp3";
-        Events.Log("save: " + fullFileName);
+        Debug.Log("save: " + fullFileName);
         EncodeMP3.convert(audioClip, fullFileName, 128, false);
     }
     public void SaveMp3Locally(AudioClip audioClip, string fullFileName)
     {
-        Events.Log("SaveMp3Locally: " + fullFileName);
+        Debug.Log("SaveMp3Locally: " + fullFileName);
         EncodeMP3.convert(audioClip, fullFileName, 128, true);
     }
     void SaveImage(Texture2D texture2d)

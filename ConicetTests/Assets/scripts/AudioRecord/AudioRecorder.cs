@@ -58,9 +58,16 @@ public class AudioRecorder : MonoBehaviour
         CancelInvoke();
         print("Stop Recoding");
         Microphone.End("");
+        if (recording == null)
+        {
+            Events.Log("No mic available");
+        }
 
         AudioClip recordingNew = AudioClip.Create(recording.name, (int)((Time.time - startRecordingTime) * recording.frequency), recording.channels, recording.frequency, false);
-       
+        if (recordingNew == null)
+        {
+            Events.Log("No recordingNew available");
+        }
 
         float[] data = new float[(int)((Time.time - startRecordingTime) * recording.frequency)];       
         recording.GetData(data, 0);       
@@ -72,18 +79,61 @@ public class AudioRecorder : MonoBehaviour
         if (recording != null)
         {
             string folder = "tests";
-            Directory.CreateDirectory(Application.persistentDataPath + "/" + folder);
 
-            string fullFileName = Application.persistentDataPath + "/" + folder + "/" + Data.Instance.GetFileName();
+            string fullFileName = "";
+#if UNITY_EDITOR
+#elif UNITY_ANDROID
+        fullFileName = "file://";
+#endif
+            string Fullfolder = fullFileName + Application.persistentDataPath + "/" + folder;
+            Debug.Log("Folder: " + Fullfolder);
 
+           // string path = "/storage/emulated/0/Android/data/com.conicet.ConicetTests/files/tests";
+            string path = System.IO.Path.Combine(Application.persistentDataPath, folder);
+
+            Debug.Log("Exis path: " + path + " ?");
+
+            if (!Directory.Exists(path))
+            {
+                Debug.Log("Exists path: " + path + " ?");
+                Directory.CreateDirectory(path);
+            }
+
+            path = System.IO.Path.Combine(Application.persistentDataPath, folder, Data.Instance.GetFileName());
+
+            string jsonFile = path + ".json";
+
+            Debug.Log("jsonFile: " + jsonFile);
             string json = JsonUtility.ToJson(Data.Instance.testData);
-            File.WriteAllText(fullFileName + ".json", json);
 
-            Data.Instance.databaseContent.SaveMp3Locally(recording, fullFileName + ".mp3");
+            Debug.Log("json: " + json);
+            File.WriteAllText(jsonFile, json);
+
+            string mp3File = path + ".mp3";
+            Debug.Log("mp3File: " + jsonFile);
+
+            Data.Instance.databaseContent.SaveMp3Locally(recording, mp3File);
         }
-
+      
     }
+    //public static DirectoryInfo SafeCreateDirectory(string path)
+    //{
+    //    //Generate if you don't check if the directory exists
+    //    if (Directory.Exists(path))
+    //    {
+    //        return null;
+    //    }
+    //    return Directory.CreateDirectory(path);
+    //}
 
-    
+    //public void Score_Save(string folder, string date)
+    //{
+    //    //Data storage
+    //    SafeCreateDirectory(Application.persistentDataPath + "/" + folder);
+       
+    //}
+
+
+
 
 }

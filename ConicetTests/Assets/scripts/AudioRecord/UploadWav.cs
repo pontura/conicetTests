@@ -31,7 +31,8 @@ public class UploadWav : MonoBehaviour
         this.OnDone = OnDone;
         paths = new List<string>();
 
-        string worldsFolder = Application.persistentDataPath + "/tests/";
+        string worldsFolder = System.IO.Path.Combine(Application.persistentDataPath, "tests", Data.Instance.GetFileName());
+
         print("upload all : " + worldsFolder);
         DirectoryInfo d = new DirectoryInfo(worldsFolder);
         foreach (var file in d.GetFiles("*.mp3"))
@@ -110,19 +111,18 @@ public class UploadWav : MonoBehaviour
         UnityWebRequest request = new UnityWebRequest();
         WWWForm form = new WWWForm();
 
-
-        string path = Application.persistentDataPath + "/tests/" + filename + ".mp3";
+        string fullPath = System.IO.Path.Combine(Application.persistentDataPath, "tests", filename);
+        string path = fullPath + ".mp3";
 #if UNITY_EDITOR
         request = UnityWebRequest.Get(path);
 #else
         request = UnityWebRequest.Get("file:/" + path);
 #endif
         yield return request.SendWebRequest();
+
         form.AddBinaryData("files", request.downloadHandler.data, filename + ".mp3");
-
-
-
-        path = Application.persistentDataPath + "/tests/" + filename + ".json";
+        
+        path = fullPath + ".json";
         using (UnityWebRequest www = UnityWebRequest.Get(path))
         {
             yield return www.Send();

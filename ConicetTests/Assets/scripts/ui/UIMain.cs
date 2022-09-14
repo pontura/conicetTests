@@ -44,6 +44,8 @@ namespace Conicet.UI
             Debug.Log("Init");
             if (Data.Instance.tabletID == 0)
                 GetComponent<DatabaseTablet>().Init();
+            else if (PlayerPrefs.GetInt("activeText", 0) == 0)
+                OpenSettings();
             else
                 MainMenu();
         }
@@ -58,7 +60,7 @@ namespace Conicet.UI
         void Log(string s)
         {
             CancelInvoke();
-            debugField.text = s;
+            debugField.text = s + "\n" + debugField.text;
             Debug.Log(s);
         }
         private void Reset()

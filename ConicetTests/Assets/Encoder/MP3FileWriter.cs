@@ -217,8 +217,11 @@ namespace NAudio.Lame
 			if (format == null)
 				throw new ArgumentNullException("format");
 
-			// check for unsupported wave formats
-			if (format.Channels != 1 && format.Channels != 2)
+            // Events.Log("Channels:" + format.Channels + "  SampleRate:" + format.SampleRate + "  Encoding:" + format.Encoding.ToString() + " BitsPerSample " + format.BitsPerSample);
+            //Debug.Log("Channels:" + format.Channels + "  SampleRate:" + format.SampleRate + "  Encoding:" + format.Encoding.ToString() + " BitsPerSample " + format.BitsPerSample);
+
+            // check for unsupported wave formats
+            if (format.Channels != 1 && format.Channels != 2)
 				throw new ArgumentException(string.Format("Unsupported number of channels {0}", format.Channels), "format");
 			if (format.Encoding != WaveFormatEncoding.Pcm && format.Encoding != WaveFormatEncoding.IeeeFloat)
 				throw new ArgumentException(string.Format("Unsupported encoding format {0}", format.Encoding.ToString()), "format");
