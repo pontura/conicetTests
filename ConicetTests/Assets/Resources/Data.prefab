@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 1136778467370799987}
   - component: {fileID: 1136778467370799988}
   - component: {fileID: 1136778467370799990}
+  - component: {fileID: 296592710}
   m_Layer: 0
   m_Name: Data
   m_TagString: Untagged
@@ -44,10 +45,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1e40d95e4719c404e8e5f61d31818648, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  url: http://pontura.com/conicet/
-  DEBUG: 0
+  state: 0
+  type: 0
+  sampleRate: 44100
   allLoaded: 0
-  databaseContent: {fileID: 0}
+  databaseContent: {fileID: 1136778467370799990}
+  uploadWav: {fileID: 296592710}
+  tabletID: 0
+  userAutoIncrementID: 0
+  testData:
+    version: 0
+    test: 
+    timeStamp: 
+    userid: 
+    time: []
 --- !u!114 &1136778467370799990
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -60,8 +71,37 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4b44fc61cea47c54ba71740a7d32bbfb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  audioRecForDEBUG: {fileID: 0}
+  allLoaded: 0
+  version: 0
+  activeTest:
+    id: 0
+    name: 
+    content:
+      name: 
+      session:
+        assets:
+          backgrounds: []
+          objects: []
+        levels: []
+        time_limit: 0
   url: https://ciipme-voc.wnpower.host/produccion/sync/download
   main:
     version: 0
     game_objects: []
     config_profiles: []
+--- !u!114 &296592710
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1136778467370799991}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 90c6cdb583427b94ba92d2701df0cf45, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  paths: []
+  field: {fileID: 0}
+  lastIDSended: 0

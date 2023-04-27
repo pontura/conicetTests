@@ -44,7 +44,7 @@ public class AudioRecorder : MonoBehaviour
         int minFreq;
         int maxFreq;
         //int freq = 22500;
-        int freq = 44100;
+        int freq = Data.Instance.sampleRate;
         Microphone.GetDeviceCaps("", out minFreq, out maxFreq);
         if (maxFreq < freq)
             freq = maxFreq;

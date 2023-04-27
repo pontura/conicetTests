@@ -9,7 +9,7 @@ using UnityEngine.Networking;
 public class UploadWav : MonoBehaviour
 {
     // string url = "http://pontura.com/conicet/uploadAudio.php";
-    string url = "http://ciipme-voc.wnpower.host/produccion/sync/upload/";
+    string url = "https://ciipme-voc.wnpower.host/produccion/sync/upload/";
 
     System.Action<bool> OnDone;
     int id = 0;
@@ -23,7 +23,7 @@ public class UploadWav : MonoBehaviour
     public void Init()
     {
         if (lastIDSended > 0)
-            field.text = "Último enviado: " + lastIDSended;
+            field.text = "Último enviado: " + lastIDSended.ToString("0000");
     }
     public void UploadAll(System.Action<bool> OnDone)
     {
@@ -31,17 +31,19 @@ public class UploadWav : MonoBehaviour
         this.OnDone = OnDone;
         paths = new List<string>();
 
-        string worldsFolder = System.IO.Path.Combine(Application.persistentDataPath, "tests", Data.Instance.GetFileName());
+
+        string worldsFolder = System.IO.Path.Combine(Application.persistentDataPath, "tests");
 
         print("upload all : " + worldsFolder);
         DirectoryInfo d = new DirectoryInfo(worldsFolder);
         foreach (var file in d.GetFiles("*.mp3"))
         {
             string fileName = file.Name.Split("."[0])[0];
+            int idSended = int.Parse(fileName.Split("-"[0])[1]);
 
-            if (int.Parse(fileName) > lastIDSended)
+            if (idSended > lastIDSended)
             {
-                print("fileName: " + fileName + "  lastIDSended " + lastIDSended);
+                print("fileName:" + fileName + ". Last ID Sended " + lastIDSended);
                 paths.Add(fileName);
             }
             // StartCoroutine(LoadFile(file.Name));
@@ -67,57 +69,30 @@ public class UploadWav : MonoBehaviour
             SendNext();
         else
         {
-            lastIDSended = int.Parse(paths[id - 1]);
+
+            lastIDSended = int.Parse(paths[id - 1].Split("-"[0])[1]);
             field.text = "Enviados " + id;
             PlayerPrefs.SetInt("lastIDSended", lastIDSended);
         }
     }
-
-
-
-    //        UnityWebRequest[] files = new UnityWebRequest[path.Count];
-
-    //        WWWForm form = new WWWForm();
-
-    //        for (int i = 0; i < files.Length; i++)
-    //        {
-
-    //#if UNITY_EDITOR
-    //            string p = Application.persistentDataPath + "/test/" + path[i];
-    //            files[i] = UnityWebRequest.Get(p);
-    //            print(p);
-    //#else
-
-    //            string p = "file://" + Application.persistentDataPath + "/test/" + path[i];
-    //            files[i] = UnityWebRequest.Get(p);
-    //#endif
-
-    //            yield return files[i].SendWebRequest();
-    //            form.AddBinaryData("files[]", files[i].downloadHandler.data, Path.GetFileName(path[i]));
-
-    //        }
-
-    //        UnityWebRequest req = UnityWebRequest.Post(url, form);
-    //        yield return req.SendWebRequest();
-
-    //        if (req.isHttpError || req.isNetworkError)
-    //            Events.Log(req.error);
-    //        else
-    //            Debug.Log("Uploaded ");
-    // }
 
     IEnumerator Upload(string filename, System.Action<bool> OnReady)
     {
         UnityWebRequest request = new UnityWebRequest();
         WWWForm form = new WWWForm();
 
-        string fullPath = System.IO.Path.Combine(Application.persistentDataPath, "tests", filename);
-        string path = fullPath + ".mp3";
+
+        string fullPath = "";
 #if UNITY_EDITOR
-        request = UnityWebRequest.Get(path);
-#else
-        request = UnityWebRequest.Get("file:/" + path);
+#elif UNITY_ANDROID
+        fullPath = "file://";
 #endif
+        fullPath = fullPath + Application.persistentDataPath + "/tests/" + filename;
+        //string fullPath = System.IO.Path.Combine(Application.persistentDataPath, "tests", filename);
+
+        string path = fullPath + ".mp3";
+        Debug.Log("Upload: " + path);
+        request = UnityWebRequest.Get(path);
         yield return request.SendWebRequest();
 
         form.AddBinaryData("files", request.downloadHandler.data, filename + ".mp3");
@@ -137,10 +112,10 @@ public class UploadWav : MonoBehaviour
                 form.AddField("data", jsonData);
             }
         }
-
+        print("MANDA: uuid: " + filename);
 
         form.AddField("uuid", filename);
-        Debug.Log("url: " + url + form);
+        Debug.Log("url: " + url);
 
         UnityWebRequest req = UnityWebRequest.Post(url, form);
         yield return req.SendWebRequest();
@@ -152,6 +127,7 @@ public class UploadWav : MonoBehaviour
         }
         else
         {
+            Events.Log("Request response: " + req.result + " text: " + req.downloadHandler.text);
             Events.Log("Uploaded " + filename);
             OnReady(true);
         }

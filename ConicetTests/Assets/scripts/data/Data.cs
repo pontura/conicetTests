@@ -12,9 +12,11 @@ public class Data : MonoBehaviour
         online,
         offline
     }
+
     const string PREFAB_PATH = "Data";
     static Data mInstance = null;
-   
+    public int sampleRate = 44100;
+
     int dataLoaded;
     public bool allLoaded;
     public DatabaseContent databaseContent;
@@ -66,9 +68,11 @@ public class Data : MonoBehaviour
     }
     private void Start()
     {
+        string[] arr = Microphone.devices;
         StartCoroutine(databaseContent.Load(OnLoaded, state == states.online));
         tabletID = PlayerPrefs.GetInt("tabletID", 0);
         userAutoIncrementID = PlayerPrefs.GetInt("userAutoIncrementID", 0);
+        sampleRate = PlayerPrefs.GetInt("sampleRate", 44100);
         uploadWav = GetComponent<UploadWav>();
     }
     void OnLoaded()
@@ -77,10 +81,11 @@ public class Data : MonoBehaviour
     }
     public string GetFileName(bool next = false)
     {
-        if(next)
-            return tabletID.ToString() + "" + (userAutoIncrementID+1);
+
+        if (next)
+            return tabletID.ToString("00") + "-" + (userAutoIncrementID + 1).ToString("0000");
         else
-            return tabletID.ToString() + "" + userAutoIncrementID;
+            return tabletID.ToString("00") + "-" + (userAutoIncrementID).ToString("0000");
     }
     public TestData testData;
 
@@ -89,5 +94,10 @@ public class Data : MonoBehaviour
         testData = new TestData();
         userAutoIncrementID++;
         PlayerPrefs.SetInt("userAutoIncrementID", userAutoIncrementID);
+    }
+    public void SetSampleRate(int newSampleRate)
+    {
+        PlayerPrefs.SetInt("sampleRate", newSampleRate);
+        sampleRate = newSampleRate;
     }
 }

@@ -11,6 +11,7 @@ namespace Conicet.UI
         [SerializeField] Text field;
         [SerializeField] Text testField;
         [SerializeField] GameObject panel;
+        [SerializeField] GameObject end;
 
         [SerializeField] GameObject rewardPanel;
         [SerializeField] Image rewardThumb;
@@ -19,6 +20,8 @@ namespace Conicet.UI
         [SerializeField] Image image;
         [SerializeField] AudioRecorder audioRecorder;
         AudioSource audioSource;
+        [SerializeField] AudioSource audioSourceAlert;
+        [SerializeField] Animation anim;
         public states state;
         public enum states
         {
@@ -37,24 +40,30 @@ namespace Conicet.UI
         }
         public void Init()
         {
+            end.SetActive(false);
             Data.Instance.testData.Init(Data.Instance.GetFileName());
             timer = 0;
             state = states.RECORDING;
             panel.SetActive(true);
             audioRecorder.Init(1000);
-            testField.text = "TEST " + Data.Instance.GetFileName();
+            testField.text = Data.Instance.GetFileName();
             Next();
         }
         void OnAudioLoaded(AudioClip audioClip)
         {
             audioSource.clip = audioClip;
-            audioSource.Play();
         }
         void OnTextureLoaded(Texture2D tex)
         {
             image.sprite = Sprite.Create(tex, new Rect(0.0f, 0.0f, tex.width, tex.height), new Vector2(0.5f, 0.5f), 100.0f);
             image.SetNativeSize();
-            image.GetComponent<Animation>().Play();
+            CancelInvoke();
+            Invoke("GameRestart", 0.5f);
+        }
+        void GameRestart()
+        {
+            CancelInvoke();
+            anim.Play("game_init");
         }
         public void Cancel()
         {
@@ -62,12 +71,19 @@ namespace Conicet.UI
             UIMain.Instance.Init();
             panel.SetActive(false);
         }
+        DatabaseContent.Levels level;
         public void Next()
         {
+            CancelInvoke();
             DatabaseContent.ConfigProfiles active = Data.Instance.databaseContent.GetActive();
             if (active.content.session.levels.Length > levelID)
             {
-                DatabaseContent.Levels level = active.content.session.levels[levelID];
+                if (active.content.session.assets.character == "Nilda")
+                    Events.ChangeCharacter(2);
+                else
+                    Events.ChangeCharacter(1);
+
+                level = active.content.session.levels[levelID];
                 if (level.stages.Length > stageID)
                 {
                     DatabaseContent.Stages stage = level.stages[stageID];
@@ -81,17 +97,61 @@ namespace Conicet.UI
                 }
                 else
                 {
-                    SetRewardPanel();
+                    if (active.content.session.levels.Length > levelID)
+                        SetRewardPanel();
                 }
-                Data.Instance.testData.Add(timer);
+                anim.Play("game_end");
             }
             else
             {
-                Reset();
-                GetComponent<Conicet.UI.UIGameOver>().Init(); 
-                audioRecorder.Stop();
-                panel.SetActive(false);
+                rewardPanel.SetActive(false);
+                end.SetActive(true);
+                Events.Log("List! Procesando " + Data.Instance.GetFileName() + "...");
+                StartCoroutine(End());
             }
+        }
+
+        IEnumerator End()
+        {
+            yield return new WaitForSeconds(0.15f);
+            audioRecorder.Stop();
+            rewardPanel.SetActive(false);
+            panel.SetActive(false);
+            yield return new WaitForEndOfFrame();
+            yield return new WaitForEndOfFrame();
+            GetComponent<Conicet.UI.UIGameOver>().Init();
+            yield return new WaitForEndOfFrame();
+            Reset();
+            Events.Log("Test grabado!");
+        }
+        public void OnReadyClicked()
+        {
+            CancelInvoke();
+            anim.Play("game_character_out");
+            audioSource.Play();
+            Data.Instance.testData.Add(timer);
+            int delay = 10;
+            if (level != null && level.recording_time > 0)
+                delay = level.recording_time;
+            Invoke("OnTimeout1", delay);
+        }
+        void OnTimeout1()
+        {
+            CancelInvoke();
+            Alert();
+            int delay = 10;
+            if (level != null && level.recording_time > 0)
+                delay = level.recording_time;
+            Invoke("OnTimeout2", delay);
+        }
+        void OnTimeout2()
+        {
+            Alert();
+            OnRewardClicked();
+        }
+        void Alert()
+        {
+            audioSourceAlert.Play();
         }
         private void Update()
         {
@@ -111,6 +171,7 @@ namespace Conicet.UI
         bool rewardClicked;
         public void SetRewardPanel()
         {
+            CancelInvoke();
             rewardClicked = false;
             rewardPanel.SetActive(true);
             Invoke("OnRewardClicked", 10);
@@ -118,9 +179,11 @@ namespace Conicet.UI
             if (rewardInt >= rewards.Length) rewardInt = 0;
             rewardThumb.sprite = rewards[rewardInt];
         }
+        
         public void OnRewardClicked()
         {
             if (rewardClicked) return;
+            CancelInvoke();
             rewardClicked = true;
             CancelInvoke();
             levelID++;
@@ -130,6 +193,7 @@ namespace Conicet.UI
         }
         public void SetRewardOff()
         {
+            CancelInvoke();
             rewardPanel.SetActive(false);
         }
     }

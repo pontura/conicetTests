@@ -54,13 +54,14 @@ public class DatabaseContent : MonoBehaviour
     {
         public string[] backgrounds;
         public string[] objects;
+        public string character;
     }
     [Serializable]
     public class Levels
     {
         public string background;
         public string name;
-        public int recording_time;
+        public int recording_time = 10;
         public Stages[] stages;
     }
     [Serializable]
@@ -107,6 +108,11 @@ public class DatabaseContent : MonoBehaviour
             SetActive(active);
 
         OnLoaded();
+        Invoke("Delayed", 0.1f);
+    }
+    void Delayed()
+    {
+        Events.ChangeCharacter(characterID);
     }
     void AllReady()
     {
@@ -115,14 +121,22 @@ public class DatabaseContent : MonoBehaviour
     }
 
 
-
+    int characterID = 1;
     public void SetActive(int id)
     {
         print("id: " + id);
         PlayerPrefs.SetInt("activeText", id);
         foreach (ConfigProfiles cf in main.config_profiles)
             if (cf.id == id)
+            {
                 activeTest = cf;
+
+                if (cf.content.session.assets.character == "Nilda")
+                    characterID = 2;
+                else
+                    characterID = 1;
+                Events.ChangeCharacter(characterID);
+            }
     }
     public ConfigProfiles GetConfig(string name)
     {
