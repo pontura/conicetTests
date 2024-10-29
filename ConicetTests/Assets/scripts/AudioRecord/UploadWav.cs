@@ -1,16 +1,14 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
-using System;
 using System.IO;
 using UnityEngine.Networking;
+using UnityEngine.UI;
 
 public class UploadWav : MonoBehaviour
 {
     // string url = "http://pontura.com/conicet/uploadAudio.php";
     string url = "https://ciipme-voc.wnpower.host/produccion/sync/upload/";
-
     System.Action<bool> OnDone;
     int id = 0;
     public List<string> paths;
