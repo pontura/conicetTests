@@ -8,7 +8,8 @@ using UnityEngine.UI;
 public class UploadWav : MonoBehaviour
 {
     // string url = "http://pontura.com/conicet/uploadAudio.php";
-    string url = "https://ciipme-voc.wnpower.host/produccion/sync/upload/";
+    string url = "https://conicet.casacam.net/produccion/sync/upload/";
+  //  string url = "https://ciipme-voc.wnpower.host/produccion/sync/upload/";
     System.Action<bool> OnDone;
     int id = 0;
     public List<string> paths;
